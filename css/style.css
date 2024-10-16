@@ -1,0 +1,42 @@
+.navbar {
+    background-color: #22223B;
+
+}
+
+
+.navbar .nav-link {
+    color: #F2E9E4;
+}
+
+.navbar .navbar-brand {
+    color: #F2E9E4;
+}
+
+.navbar .nav-link.active {
+    color: #EF476F;
+}
+
+.navbar .nav-link:hover {
+    color: #FBAF00;
+}
+
+/* Prihlasit sa */
+.navbar .nav-link.btn {
+    background-color: #00C2D1;
+    color: #22223B;
+}
+
+.navbar .nav-link.btn:hover {
+    color: #F2E9E4;
+}
+
+.navbar-toggler {
+    background-color: #00C2D1;
+
+}
+
+.navbar-toggler:hover {
+    background-color: #FBAF00;
+
+}
+
