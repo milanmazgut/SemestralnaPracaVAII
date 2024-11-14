@@ -1,0 +1,6 @@
+@SemestralnaPraca.Server_HostAddress = http://localhost:5190
+
+GET {{SemestralnaPraca.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

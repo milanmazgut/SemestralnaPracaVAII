@@ -1,0 +1,23 @@
+{
+  "Version": 1,
+  "Hash": "k3rMDm+VMXh9nt5Cn7wWFWxGxyK6qR1/3vXdalR4tOQ=",
+  "Source": "SemestralnaPraca.Server",
+  "BasePath": "_content/SemestralnaPraca.Server",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [
+    {
+      "Identity": "C:\\Users\\mazgu\\Desktop\\SemestralnaPracaVAII\\SemestralnaPracaVAII\\SemestralnaPraca\\semestralnapraca.client\\semestralnapraca.client.esproj",
+      "Version": 2,
+      "Source": "semestralnapraca.client",
+      "GetPublishAssetsTargets": "GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained"
+    }
+  ],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

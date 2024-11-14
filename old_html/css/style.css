@@ -1,0 +1,64 @@
+body {
+    background-color: #F2E9E4;
+}
+
+
+
+.navbar {
+    background-color: #22223B;
+
+}
+
+.navbar .nav-link {
+    color: #F2E9E4;
+}
+
+.navbar .navbar-brand {
+    color: #F2E9E4;
+}
+
+.navbar .nav-link.active {
+    color: #EF476F;
+}
+
+.navbar .nav-link:hover {
+    color: #FBAF00;
+}
+
+
+
+.navbar-toggler {
+    background-color: #00C2D1;
+}
+.card-body {
+    background-color: #22223B;
+    color: #F2E9E4;
+}
+
+.navbar-toggler:hover {
+    background-color: #FBAF00;
+}
+
+.btn-primary {
+    color: #22223B;
+    border-color: #00C2D1;
+    background-color: #00C2D1;
+}
+
+.btn-primary:hover {
+    background-color: #FBAF00;
+    color: #22223B;
+    border-color: #FBAF00;
+}
+
+
+
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+
+
