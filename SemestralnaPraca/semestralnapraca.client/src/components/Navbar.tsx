@@ -1,6 +1,21 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../zustand/authStore";
+import axios from "axios";
 
 const Navbar = () => {
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/Auth/Logout", null, { withCredentials: true });
+      logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Chyba pri odhlásení:", error);
+    }
+  };
+
   return (
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid">
@@ -40,11 +55,48 @@ const Navbar = () => {
                 Kontakt
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="btn btn-primary" to="/login">
-                Prihlásiť sa
-              </Link>
-            </li>
+            {isAuthenticated ? (
+              <li className="nav-item dropdown">
+                <a
+                  className="nav-link dropdown-toggle d-flex align-items-center"
+                  href="#"
+                  id="navbarDropdown"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <i className="bi bi-person-square me-2"></i>
+                  {user?.name}
+                </a>
+                <ul
+                  className="dropdown-menu dropdown-menu-end"
+                  aria-labelledby="navbarDropdown"
+                >
+                  <li>
+                    <Link className="dropdown-item" to="/profile">
+                      Profil
+                    </Link>
+                  </li>
+                  <li>
+                    <hr className="dropdown-divider" />
+                  </li>
+                  <li>
+                    <button
+                      className="dropdown-item btn-primary btn-logout"
+                      onClick={handleLogout}
+                    >
+                      Odhlásiť sa
+                    </button>
+                  </li>
+                </ul>
+              </li>
+            ) : (
+              <li className="nav-item">
+                <Link className="btn btn-primary" to="/login">
+                  Prihlásiť sa
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </div>
