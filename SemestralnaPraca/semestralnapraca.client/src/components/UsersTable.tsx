@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useState, useEffect } from "react";
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -11,6 +10,8 @@ interface User {
 
 const UsersTable: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -24,6 +25,50 @@ const UsersTable: React.FC = () => {
 
     fetchUsers();
   }, []);
+
+  const handleEdit = (userId: string) => {
+    const user = users.find((u) => u.id === userId);
+    if (user) {
+      setEditingUser(user);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleDelete = async (userId: string) => {
+    try {
+      await axios.delete(`/api/Auth/DeleteUser/${userId}`);
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    }
+  };
+
+  const handleSave = async () => {
+    if (editingUser) {
+      try {
+        await axios.put("/api/Auth/EditUser", editingUser);
+
+        setUsers((prevUsers) =>
+          prevUsers.map((user) =>
+            user.id === editingUser.id ? { ...editingUser } : user
+          )
+        );
+        setIsModalOpen(false);
+        setEditingUser(null);
+      } catch (error) {
+        console.error("Error saving user:", error);
+      }
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (editingUser) {
+      setEditingUser({
+        ...editingUser,
+        [e.target.name]: e.target.value,
+      });
+    }
+  };
 
   return (
     <div className="container mt-5">
@@ -54,7 +99,7 @@ const UsersTable: React.FC = () => {
               </td>
               <td>
                 <button
-                  className="btn btn-danger btn-sm btn-secondary"
+                  className="btn btn-danger btn-sm"
                   onClick={() => handleDelete(user.id)}
                 >
                   Delete
@@ -64,18 +109,57 @@ const UsersTable: React.FC = () => {
           ))}
         </tbody>
       </table>
+
+      {isModalOpen && editingUser && (
+        <div className="modal" style={{ display: "block" }}>
+          <div className="modal-content" style={{ display: "block" }}>
+            <h4>Edit User</h4>
+            <div className="form-group">
+              <label>Name:</label>
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={editingUser.name}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Email:</label>
+              <input
+                type="email"
+                className="form-control"
+                name="email"
+                value={editingUser.email}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label>Role:</label>
+              <input
+                type="text"
+                className="form-control"
+                name="role"
+                value={editingUser.role}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="modal-footer">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn btn-success" onClick={handleSave}>
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-const handleEdit = (userId: number) => {
-  // Implement edit functionality here
-  console.log(`Edit user with ID: ${userId}`);
-};
-
-const handleDelete = (userId: number) => {
-  // Implement delete functionality here
-  console.log(`Delete user with ID: ${userId}`);
 };
 
 export default UsersTable;

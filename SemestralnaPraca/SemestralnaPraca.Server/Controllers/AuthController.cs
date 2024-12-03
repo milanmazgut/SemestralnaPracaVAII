@@ -101,7 +101,7 @@ namespace SemestralnaPraca.Server.Controllers
         [HttpGet("GetAllUsers")]
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetAllUsers()
         {
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user != null && user.Role != "Admin")
@@ -113,7 +113,82 @@ namespace SemestralnaPraca.Server.Controllers
             return Ok(users);
         }
 
-      
+        [Authorize]
+        [HttpPut("EditUser")]
+        public async Task<IActionResult> EditUser([FromBody] EditModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _userManager.FindByIdAsync(currentUserId);
+
+            if (currentUser != null && currentUser.Role != "Admin")
+            {
+                return Forbid();
+            }
+
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+                return NotFound(new { message = "Používateľ neexistuje" });
+
+
+            user.Name = model.Name;
+            user.Email = model.Email;
+            user.Role = model.Role;
+            user.UserName = model.Email;
+            
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { message = "Používateľ bol úspešne aktualizovaný" });
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return BadRequest(ModelState);
+        }
+
+
+        [Authorize]
+        [HttpDelete("DeleteUser/{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _userManager.FindByIdAsync(currentUserId);
+
+            if (currentUser != null && currentUser.Role != "Admin")
+            {
+                return Forbid();
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound(new { message = "Používateľ neexistuje" });
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { message = "Používateľ bol úspešne zmazaný" });
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return BadRequest(ModelState);
+        }
+
 
         public class RegisterModel
         {
@@ -147,6 +222,21 @@ namespace SemestralnaPraca.Server.Controllers
 
         }
 
+        public class EditModel
+        {
+            [Required]
+            public string Id { get; set; }
+
+            [Required]
+            public string Name { get; set; }
+
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; }
+
+            [Required]
+            public string Role { get; set; }
+        }
 
     }
 }
