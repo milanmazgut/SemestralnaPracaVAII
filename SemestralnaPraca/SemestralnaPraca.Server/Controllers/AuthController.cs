@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SemestralnaPraca.Server.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -39,7 +40,8 @@ namespace SemestralnaPraca.Server.Controllers
             {
                 UserName = model.Email,
                 Email = model.Email,
-                Name = model.Name
+                Name = model.Name,
+                Role = "User"
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -56,7 +58,6 @@ namespace SemestralnaPraca.Server.Controllers
 
             return BadRequest(ModelState);
         }
-
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -91,10 +92,28 @@ namespace SemestralnaPraca.Server.Controllers
             return Ok(new
             {
                 name = user.Name,
-                email = user.Email
+                email = user.Email,
+                role = user.Role
             });
         }
 
+        [Authorize]
+        [HttpGet("GetAllUsers")]
+        public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetAllUsers()
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user != null && user.Role != "Admin")
+            {
+                return Forbid();
+            }
+
+            var users = await _userManager.Users.ToListAsync();
+            return Ok(users);
+        }
+
+      
 
         public class RegisterModel
         {

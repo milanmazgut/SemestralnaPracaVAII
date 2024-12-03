@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import ProductCard from "../components/ProductCard";
+import ProductCardWithImage from "../components/ProductCardWithImage";
 import useAuthStore from "../zustand/authStore";
 
 type Product = {
@@ -20,7 +20,7 @@ const products: Product[] = [
     image: "/images/komin.jpg",
     title: "Komíny",
     description: "Popis produktu 2.",
-    link: "/komin",
+    link: "/kominy",
   },
   {
     image: "/images/ostatne.jpg",
@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
         <h2>Naša ponuka</h2>
         <div className="row">
           {products.map((product, index) => (
-            <ProductCard
+            <ProductCardWithImage
               key={index}
               image={product.image}
               title={product.title}

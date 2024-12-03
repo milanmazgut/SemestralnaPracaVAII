@@ -77,12 +77,20 @@ const Navbar = () => {
                       Profil
                     </Link>
                   </li>
+
+                  {user?.role === "Admin" && (
+                    <li>
+                      <Link className="dropdown-item" to="/users">
+                        Správa používateľov
+                      </Link>
+                    </li>
+                  )}
                   <li>
                     <hr className="dropdown-divider" />
                   </li>
                   <li>
                     <button
-                      className="dropdown-item btn-primary btn-logout"
+                      className="dropdown-item btn-primary btn-secondary"
                       onClick={handleLogout}
                     >
                       Odhlásiť sa
