@@ -9,6 +9,10 @@ import RegisterPage from "./pages/RegisterPage";
 import useAuthStore from "./zustand/authStore";
 import axios from "axios";
 import { useEffect } from "react";
+import ProductsPage from "./pages/ProductsPage";
+import DetailPage from "./pages/DetailPage";
+import UsersTable from "./components/UsersTable";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const login = useAuthStore((state) => state.login);
@@ -38,6 +42,16 @@ function App() {
         <Route path="/kominy" element={<ChimneyDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/produkty" element={<ProductsPage />} />
+        <Route path="/detail/:id" element={<DetailPage />} />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <UsersTable />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
