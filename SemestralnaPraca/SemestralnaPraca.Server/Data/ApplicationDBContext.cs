@@ -6,6 +6,7 @@ namespace SemestralnaPraca.Server.Data
     public class ApplicationDBContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<ApplicationUser> UsersDB { get; set; }
+        public DbSet<Product> ProductsDb { get; set; }
 
         public ApplicationDBContext (DbContextOptions<ApplicationDBContext> options) :base(options)
         {
