@@ -38,7 +38,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(editingUser.email)) {
-      setErrors({ email: "Please enter a valid email address." });
+      setErrors({ email: "Prosim zadajte spravny email." });
       return;
     }
 
@@ -48,10 +48,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
   return (
     <div className="modal-overlay d-flex justify-content-center align-items-center">
       <div className="modal-dialog modal-content p-4">
-        <h4>Edit User</h4>
+        <h4>Úprava požívateľa</h4>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Name:</label>
+            <label>Meno:</label>
             <input
               type="text"
               className="form-control"
@@ -75,7 +75,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             )}
           </div>
           <div className="form-group">
-            <label>Role:</label>
+            <label>Rola:</label>
             <select
               className="form-control"
               name="role"
@@ -84,7 +84,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               required
             >
               <option value="" disabled>
-                Select Role
+                Vyberte rolu
               </option>
               <option value="Admin">Admin</option>
               <option value="User">User</option>
@@ -96,10 +96,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               className="btn btn-secondary"
               onClick={onClose}
             >
-              Cancel
+              Zrušiť
             </button>
             <button type="submit" className="btn btn-success">
-              Save Changes
+              Uložiť zmeny
             </button>
           </div>
         </form>

@@ -207,7 +207,7 @@ namespace SemestralnaPraca.Server.Controllers
             public string Name { get; set; }
         }
 
-
+         
         public class LoginModel
         {
             [Required]

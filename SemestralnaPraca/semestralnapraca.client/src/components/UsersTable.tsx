@@ -21,7 +21,7 @@ const UsersTable: React.FC = () => {
         const response = await axios.get("/api/Auth/GetAllUsers");
         setUsers(response.data);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Chyba pri ziskavani uzivatelov:", error);
       }
     };
 
@@ -41,7 +41,7 @@ const UsersTable: React.FC = () => {
       await axios.delete(`/api/Auth/DeleteUser/${userId}`);
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Chyba pri mazani pouzivatela:", error);
     }
   };
 
@@ -56,34 +56,36 @@ const UsersTable: React.FC = () => {
       setIsModalOpen(false);
       setEditingUser(null);
     } catch (error) {
-      console.error("Error saving user:", error);
+      console.error("Chyba pri ukladani pouzivatela:", error);
     }
   };
 
   return (
     <div className="container mt-5">
-      <h2>User Management</h2>
-      <table className="table table-striped table-bordered mt-3">
-        <thead className="thead-dark">
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Edit</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <UserRow
-              key={user.id}
-              user={user}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </tbody>
-      </table>
+      <h2>Spáva používatelov</h2>
+      <div className="table-responsive">
+        <table className="table table-striped table-bordered mt-3">
+          <thead className="thead-dark">
+            <tr>
+              <th>Meno</th>
+              <th>Email</th>
+              <th>Rola</th>
+              <th>Upravť</th>
+              <th>Zmazať</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <UserRow
+                key={user.id}
+                user={user}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {isModalOpen && editingUser && (
         <EditUserModal

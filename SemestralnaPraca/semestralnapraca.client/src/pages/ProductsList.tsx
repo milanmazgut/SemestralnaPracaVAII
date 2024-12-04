@@ -51,6 +51,7 @@ const ProductList: React.FC = () => {
       <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-4">
         {products.map((product) => (
           <ProductCardWithImage
+            key={product.id}
             image={product.imageUrl}
             title={product.name}
             description={product.description}

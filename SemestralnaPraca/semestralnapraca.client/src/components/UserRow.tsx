@@ -24,7 +24,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onEdit, onDelete }) => {
           className="btn btn-primary btn-sm"
           onClick={() => onEdit(user.id)}
         >
-          Edit
+          Upraviť
         </button>
       </td>
       <td>
@@ -32,7 +32,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onEdit, onDelete }) => {
           className="btn btn-danger btn-sm"
           onClick={() => onDelete(user.id)}
         >
-          Delete
+          Zmazať
         </button>
       </td>
     </tr>
