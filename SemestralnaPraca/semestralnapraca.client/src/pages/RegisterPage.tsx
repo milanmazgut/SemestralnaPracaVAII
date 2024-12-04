@@ -10,10 +10,42 @@ const RegisterPage: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const navigate = useNavigate();
 
+  const validatePassword = (password: string): string => {
+    const lengthRequirement = password.length >= 8;
+    const uppercaseRequirement = /[A-Z]/.test(password);
+    const lowercaseRequirement = /[a-z]/.test(password);
+    const numberRequirement = /[0-9]/.test(password);
+
+    if (!lengthRequirement) {
+      return "Heslo musí mať minimálne 8 znakov.";
+    } else if (!uppercaseRequirement) {
+      return "Heslo musí obsahovať aspoň jedno veľké písmeno.";
+    } else if (!lowercaseRequirement) {
+      return "Heslo musí obsahovať aspoň jedno malé písmeno.";
+    } else if (!numberRequirement) {
+      return "Heslo musí obsahovať aspoň jedno číslo.";
+    } else {
+      return "";
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    const passwordError = validatePassword(newPassword);
+    setErrorMessage(passwordError);
+  };
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
     setErrorMessage("");
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setErrorMessage(passwordError);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setErrorMessage("Heslá sa nezhodujú.");
@@ -102,7 +134,7 @@ const RegisterPage: React.FC = () => {
                     id="password"
                     className="form-control"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     required
                   />
                 </div>

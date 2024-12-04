@@ -235,6 +235,8 @@ namespace SemestralnaPraca.Server.Controllers
             public string Email { get; set; }
 
             [Required]
+            [RegularExpression("Admin|User", ErrorMessage = "Rola moze byt 'Admin' alebo 'User'.")]
+
             public string Role { get; set; }
         }
 
