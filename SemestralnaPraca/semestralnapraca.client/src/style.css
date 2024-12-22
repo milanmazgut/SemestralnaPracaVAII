@@ -35,6 +35,8 @@ body {
 }
 
 .btn-primary {
+  margin: 2%;
+  white-space: nowrap;
   color: #22223b;
   border-color: #00c2d1;
   background-color: #00c2d1;
@@ -53,6 +55,7 @@ body {
 }
 
 .btn-secondary {
+  margin: 2%;
   color: #f2e9e4;
   border-color: #ef476f;
   background-color: #ef476f;
@@ -94,4 +97,13 @@ body {
   max-width: 500px;
   width: 90%;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-text {
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2; /* počet riadkov, ktoré sa zobrazia */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
