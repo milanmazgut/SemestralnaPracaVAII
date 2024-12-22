@@ -14,6 +14,8 @@ import DetailPage from "./pages/DetailPage";
 import UsersTable from "./pages/UsersTable";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
+import EditProductPage from "./pages/EditProductPage";
+import AddProductPage from "./pages/AddProductPage";
 
 function App() {
   const login = useAuthStore((state) => state.login);
@@ -46,6 +48,8 @@ function App() {
         <Route path="/produkty" element={<ProductsList />} />
         <Route path="/detail/:id" element={<DetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="admin/products/edit/:id" element={<EditProductPage />} />
+        <Route path="/admin/products/add" element={<AddProductPage />} />
         <Route
           path="/users"
           element={
