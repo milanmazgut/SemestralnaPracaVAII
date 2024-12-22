@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import UserRow from "./UserRow";
-import EditUserModal from "./EditUserModal";
+import UserRow from "../components/UserRow";
+import EditUserModal from "../components/EditUserModal";
 
 interface User {
   id: string;
@@ -71,7 +71,6 @@ const UsersTable: React.FC = () => {
               <th>Email</th>
               <th>Rola</th>
               <th>Upravť</th>
-              <th>Zmazať</th>
             </tr>
           </thead>
           <tbody>

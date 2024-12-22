@@ -36,6 +36,13 @@ namespace SemestralnaPraca.Server.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Overenie existencie emailu
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                return Conflict(new { message = "Používateľ s týmto emailom už existuje" });
+            }
+
             var user = new ApplicationUser
             {
                 UserName = model.Email,
@@ -51,6 +58,7 @@ namespace SemestralnaPraca.Server.Controllers
                 return Ok(new { message = "Registrácia bola úspešná" });
             }
 
+            // Ak heslo nesplnilo politiku identity vrati chybu
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -71,7 +79,7 @@ namespace SemestralnaPraca.Server.Controllers
                 return Unauthorized(new { message = "Neplatné prihlasovacie údaje" });
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, isPersistent: model.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(user.UserName, model.Password, isPersistent: model.RememberMe, lockoutOnFailure: true);
 
             if (result.Succeeded)
             {
@@ -81,13 +89,21 @@ namespace SemestralnaPraca.Server.Controllers
             return Unauthorized(new { message = "Neplatné prihlasovacie údaje" });
         }
 
-
         [Authorize]
         [HttpGet("UserProfile")]
         public async Task<IActionResult> GetUserProfile()
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new { message = "Používateľská identita nie je k dispozícii." });
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "Používateľ neexistuje." });
+            }
 
             return Ok(new
             {
@@ -102,9 +118,14 @@ namespace SemestralnaPraca.Server.Controllers
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetAllUsers()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _userManager.FindByIdAsync(userId);
+            var currentUser = await _userManager.FindByIdAsync(userId);
 
-            if (user != null && user.Role != "Admin")
+            if (currentUser == null)
+            {
+                return Unauthorized(new { message = "Neplatný používateľ." });
+            }
+
+            if (currentUser.Role != "Admin")
             {
                 return Forbid();
             }
@@ -123,22 +144,35 @@ namespace SemestralnaPraca.Server.Controllers
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUser = await _userManager.FindByIdAsync(currentUserId);
 
-            if (currentUser != null && currentUser.Role != "Admin")
+            if (currentUser == null || currentUser.Role != "Admin")
             {
                 return Forbid();
             }
-
 
             var user = await _userManager.FindByIdAsync(model.Id);
             if (user == null)
                 return NotFound(new { message = "Používateľ neexistuje" });
 
+            // Overenie emailu
+            if (!string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var userWithSameEmail = await _userManager.FindByEmailAsync(model.Email);
+                if (userWithSameEmail != null && userWithSameEmail.Id != user.Id)
+                {
+                    return Conflict(new { message = "Používateľ s týmto emailom už existuje" });
+                }
+            }
+
+
+            if (model.Role != "Admin" && model.Role != "User")
+            {
+                return BadRequest(new { message = "Rola môže byť iba 'Admin' alebo 'User'." });
+            }
 
             user.Name = model.Name;
             user.Email = model.Email;
             user.Role = model.Role;
             user.UserName = model.Email;
-            
 
             var result = await _userManager.UpdateAsync(user);
 
@@ -155,7 +189,6 @@ namespace SemestralnaPraca.Server.Controllers
             return BadRequest(ModelState);
         }
 
-
         [Authorize]
         [HttpDelete("DeleteUser/{id}")]
         public async Task<IActionResult> DeleteUser(string id)
@@ -163,7 +196,7 @@ namespace SemestralnaPraca.Server.Controllers
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUser = await _userManager.FindByIdAsync(currentUserId);
 
-            if (currentUser != null && currentUser.Role != "Admin")
+            if (currentUser == null || currentUser.Role != "Admin")
             {
                 return Forbid();
             }
@@ -172,6 +205,12 @@ namespace SemestralnaPraca.Server.Controllers
             if (user == null)
             {
                 return NotFound(new { message = "Používateľ neexistuje" });
+            }
+
+            //Hlavny admin
+            if (user.Role == "Admin" && user.Email == "mino@test.sk")
+            {
+                return BadRequest(new { message = "Tohto administrátora nie je možné zmazať." });
             }
 
             var result = await _userManager.DeleteAsync(user);
@@ -189,54 +228,52 @@ namespace SemestralnaPraca.Server.Controllers
             return BadRequest(ModelState);
         }
 
-
         public class RegisterModel
         {
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Email je povinný.")]
+            [EmailAddress(ErrorMessage = "Neplatný formát emailu.")]
             public string Email { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Heslo je povinné.")]
+            [MinLength(6, ErrorMessage = "Heslo musí mať aspoň 6 znakov.")]
             public string Password { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Je potrebné potvrdiť heslo.")]
             [Compare("Password", ErrorMessage = "Heslá sa nezhodujú.")]
             public string ConfirmPassword { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Meno je povinné.")]
             public string Name { get; set; }
         }
 
-         
         public class LoginModel
         {
-            [Required]
-            [EmailAddress]
-            public string Email { get; set; } 
+            [Required(ErrorMessage = "Email je povinný.")]
+            [EmailAddress(ErrorMessage = "Neplatný formát emailu.")]
+            public string Email { get; set; }
 
-            [Required]
-            public string Password { get; set; } 
+            [Required(ErrorMessage = "Heslo je povinné.")]
+            public string Password { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Pole 'Zapamätať si ma' je povinné.")]
             public bool RememberMe { get; set; }
 
         }
 
         public class EditModel
         {
-            [Required]
+            [Required(ErrorMessage = "Id je povinné.")]
             public string Id { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Meno je povinné.")]
             public string Name { get; set; }
 
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Email je povinný.")]
+            [EmailAddress(ErrorMessage = "Neplatný formát emailu.")]
             public string Email { get; set; }
 
-            [Required]
-            [RegularExpression("Admin|User", ErrorMessage = "Rola moze byt 'Admin' alebo 'User'.")]
-
+            [Required(ErrorMessage = "Rola je povinná.")]
+            [RegularExpression("Admin|User", ErrorMessage = "Rola môže byť 'Admin' alebo 'User'.")]
             public string Role { get; set; }
         }
 
