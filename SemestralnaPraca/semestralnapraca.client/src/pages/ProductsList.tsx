@@ -122,7 +122,7 @@ const ProductList: React.FC = () => {
 
       {/* Zoznam produktov */}
       <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-4 align-items-stretch">
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
           <div className="col" key={product.id}>
             <ProductCardWithImage
               image={product.imageUrl}
