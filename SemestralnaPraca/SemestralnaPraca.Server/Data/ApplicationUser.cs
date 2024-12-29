@@ -7,5 +7,10 @@ namespace SemestralnaPraca.Server.Data
         public string Name { get; set; }
 
         public string Role {  get; set; }
+
+        public string Adress { get; set; }
+
+        public ICollection<Order> Orders { get; set; }
+
     }
 }

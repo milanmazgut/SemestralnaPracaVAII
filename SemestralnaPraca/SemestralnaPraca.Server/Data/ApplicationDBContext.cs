@@ -7,6 +7,9 @@ namespace SemestralnaPraca.Server.Data
     {
         public DbSet<ApplicationUser> UsersDB { get; set; }
         public DbSet<Product> ProductsDb { get; set; }
+        public DbSet<Order> OrdersDb { get; set; }
+        public DbSet<OrderItem> ItemsDb { get; set; }
+        public DbSet<OrderState> OrderStates {  get; set; }
 
         public ApplicationDBContext (DbContextOptions<ApplicationDBContext> options) :base(options)
         {

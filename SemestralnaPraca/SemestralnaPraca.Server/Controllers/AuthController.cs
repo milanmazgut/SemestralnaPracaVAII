@@ -26,6 +26,7 @@ namespace SemestralnaPraca.Server.Controllers
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout()
         {
+
             await _signInManager.SignOutAsync();
             return Ok(new { message = "Boli ste úspešne odhlásený" });
         }
@@ -109,7 +110,8 @@ namespace SemestralnaPraca.Server.Controllers
             {
                 name = user.Name,
                 email = user.Email,
-                role = user.Role
+                role = user.Role,
+                adress = user.Adress
             });
         }
 
