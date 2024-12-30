@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 interface UserProfile {
+  id: string;
   name: string;
   email: string;
+  address: string;
   role: string;
 }
 
@@ -11,8 +14,10 @@ const ProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [editedProfile, setEditedProfile] = useState<UserProfile>({
+    id: "",
     name: "",
     email: "",
+    address: "",
     role: "",
   });
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -51,28 +56,18 @@ const ProfilePage: React.FC = () => {
     setErrorMessage("");
 
     try {
-      // Tu predpokladáme, že máte endpoint na úpravu profilu.
-      // Momentálne vo vašom kóde je EditUser iba pre admina a potrebuje ID používateľa.
-      // Ak chcete, aby sa bežný používateľ mohol upraviť, je potrebné buď:
-      // 1. Umožniť EditUser endpointu prijať prihláseného používateľa a zmeniť bez ID
-      // alebo
-      // 2. Vrátiť aj Id v UserProfile a poslať ho sem.
-
-      // PRÍKLAD: Ak by ste ID užívateľa v UserProfile nevracali, treba to upraviť na serveri.
-      // Tu predpokladáme, že pridáte ID do UserProfile odpovede. Napr.:
-      // return Ok(new { id = user.Id, name = user.Name, email = user.Email, role = user.Role });
-      //
-      // Potom by ste mali profil s `id`.
-      //
-      // Príklad PUT požiadavky:
-      if (!profile) return;
+      if (!profile || !profile.id) {
+        setErrorMessage("Neplatný používateľský profil.");
+        return;
+      }
 
       const response = await axios.put(
         "/api/Auth/EditUser",
         {
-          Id: (profile as any).id, // ak id nevraciate, treba doplniť na backende
+          Id: profile.id,
           Name: editedProfile.name,
           Email: editedProfile.email,
+          Address: editedProfile.address,
           Role: editedProfile.role,
         },
         { withCredentials: true }
@@ -101,16 +96,16 @@ const ProfilePage: React.FC = () => {
   };
 
   if (!profile) {
-    return <div>Načítavam profil...</div>;
+    return <div className="container mt-5">Načítavam profil...</div>;
   }
 
   return (
-    <div className="container-lg">
+    <div className="container-lg mt-5">
       <h2>Môj profil</h2>
       {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
 
       {!editMode ? (
-        <div>
+        <div className="card p-4">
           <p>
             <strong>Meno:</strong> {profile.name}
           </p>
@@ -118,49 +113,80 @@ const ProfilePage: React.FC = () => {
             <strong>Email:</strong> {profile.email}
           </p>
           <p>
+            <strong>Adresa:</strong> {profile.address}
+          </p>
+          <p>
             <strong>Rola:</strong> {profile.role}
           </p>
-
-          <button className="btn btn-primary" onClick={handleEditClick}>
-            Upraviť
-          </button>
+          <div className="d-flex">
+            <button className="btn btn-primary" onClick={handleEditClick}>
+              Upraviť
+            </button>
+            <Link className="btn btn-primary" to="/mojeObjednavky">
+              Moje objednavky
+            </Link>
+          </div>
         </div>
       ) : (
-        <div>
+        <div className="card p-4">
           <div className="mb-3">
-            <label className="form-label">Meno:</label>
+            <label htmlFor="name" className="form-label">
+              Meno:
+            </label>
             <input
               type="text"
               className="form-control"
               name="name"
+              id="name"
               value={editedProfile.name}
               onChange={handleChange}
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">Email:</label>
+            <label htmlFor="email" className="form-label">
+              Email:
+            </label>
             <input
               type="email"
               className="form-control"
               name="email"
+              id="email"
               value={editedProfile.email}
               onChange={handleChange}
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">Rola:</label>
+            <label htmlFor="address" className="form-label">
+              Adresa:
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              name="address"
+              id="address"
+              value={editedProfile.address}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="role" className="form-label">
+              Rola:
+            </label>
             <input
               type="text"
               className="form-control"
               name="role"
+              id="role"
               value={editedProfile.role}
               onChange={handleChange}
+              disabled
             />
           </div>
 
-          <button className="btn btn-success me-2" onClick={handleSaveClick}>
+          <button className="btn btn-success" onClick={handleSaveClick}>
             Uložiť
           </button>
+
           <button className="btn btn-secondary" onClick={handleCancelClick}>
             Zrušiť
           </button>

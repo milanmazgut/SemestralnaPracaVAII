@@ -16,9 +16,13 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ProfilePage from "./pages/ProfilePage";
 import EditProductPage from "./pages/EditProductPage";
 import AddProductPage from "./pages/AddProductPage";
+import CartPage from "./pages/CartPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrdersPage from "./pages/OrdersPage";
 
 function App() {
   const login = useAuthStore((state) => state.login);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -29,6 +33,7 @@ function App() {
         const user = response.data;
         login(user);
       } catch (error) {
+        logout();
         console.log("Používateľ nie je prihlásený");
       }
     };
@@ -48,6 +53,9 @@ function App() {
         <Route path="/produkty" element={<ProductsList />} />
         <Route path="/detail/:id" element={<DetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/mojeObjednavky" element={<OrdersPage />} />
+        <Route path="/kosik" element={<CartPage />} />
+        <Route path="checkout" element={<CheckoutPage />} />
         <Route path="admin/products/edit/:id" element={<EditProductPage />} />
         <Route path="/admin/products/add" element={<AddProductPage />} />
         <Route

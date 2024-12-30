@@ -1,18 +1,21 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import useAuthStore from "../zustand/authStore";
 import axios from "axios";
+import useCartStore from "../zustand/cartStore";
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
-  const navigate = useNavigate();
+
+  const itemsCount = useCartStore((state) =>
+    state.items.reduce((acc, item) => acc + item.quantity, 0)
+  );
 
   const handleLogout = async () => {
     try {
       await axios.post("/api/Auth/Logout", null, { withCredentials: true });
       logout();
-      navigate("/login");
     } catch (error) {
-      console.error("Chyba pri odhlásení:", error);
+      logout();
     }
   };
 
@@ -46,13 +49,14 @@ const Navbar = () => {
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/sluzby">
-                Služby
+              <Link className="nav-link" to="/kontakt">
+                Kontakt
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link" to="/kontakt">
-                Kontakt
+              <Link className="nav-link" to="/kosik">
+                <i className="bi bi-cart-fill me-1"></i>
+                Košík ({itemsCount})
               </Link>
             </li>
             {isAuthenticated ? (

@@ -71,5 +71,7 @@ export default defineConfig({
       key: fs.readFileSync(keyFilePath),
       cert: fs.readFileSync(certFilePath),
     },
+    cors: true,
+    //host: "0.0.0.0",
   },
 });
