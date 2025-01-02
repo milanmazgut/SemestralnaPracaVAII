@@ -59,6 +59,14 @@ const Navbar = () => {
                 Košík ({itemsCount})
               </Link>
             </li>
+            {isAuthenticated && user?.role === "Admin" && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin/orders">
+                  Správa objednávok
+                </Link>
+              </li>
+            )}
+
             {isAuthenticated ? (
               <li className="nav-item dropdown">
                 <a

@@ -68,6 +68,7 @@ const AdminOrdersPage: React.FC = () => {
           o.id === orderId ? { ...o, stateId: newStateId } : o
         )
       );
+      alert("Stav objednávky bol úspešne zmenený.");
     } catch (error) {
       setErrorMessage("Nepodarilo sa zmeniť stav objednávky.");
     }
