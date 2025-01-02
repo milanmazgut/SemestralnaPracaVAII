@@ -51,6 +51,7 @@ const OrdersPage: React.FC = () => {
     };
 
     fetchOrders();
+    fetchOrderStates();
   }, []);
 
   const handleCancelOrder = async (orderId: number) => {

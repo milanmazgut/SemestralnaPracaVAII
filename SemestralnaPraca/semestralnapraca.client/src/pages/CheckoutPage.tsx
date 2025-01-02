@@ -98,7 +98,7 @@ const CheckoutPage: React.FC = () => {
         </div>
         <div className="col-12">
           <label htmlFor="address" className="form-label">
-            Adresa
+            Ulica a popisné číslo
           </label>
           <input
             type="text"
