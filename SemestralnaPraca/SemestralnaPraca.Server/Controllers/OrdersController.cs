@@ -21,6 +21,49 @@ namespace SemestralnaPraca.Server.Controllers
             _userManager = userManager;
         }
 
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUser = await _userManager.FindByIdAsync(userId);
+
+            if (currentUser == null)
+            {
+                return Unauthorized(new { message = "Neplatný používateľ." });
+            }
+
+            if (currentUser.Role != "Admin")
+            {
+                return Forbid();
+            }
+
+            var orders = await _dbContext.OrdersDb
+                .Include(o => o.State)
+                .Include(o => o.OrderItem)
+                    .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.Date)
+                .ToListAsync();
+
+            var result = orders.Select(o => new
+            {
+                o.Id,
+                o.Date,
+                stateId = o.StateId,
+                stateName = o.State.Name,
+                Items = o.OrderItem.Select(oi => new
+                {
+                    oi.Product.Name,
+                    oi.Quantity,
+                    oi.Price,
+                    oi.Parameter,
+                    Total = oi.Quantity * oi.Price
+                }),
+                Total = o.OrderItem.Sum(oi => oi.Quantity * oi.Price)
+            });
+
+            return Ok(result);
+        }
+
 
         [HttpPost("add")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrder model)
@@ -139,6 +182,7 @@ namespace SemestralnaPraca.Server.Controllers
                 {
                     o.Id,
                     o.Date,
+                    stateId = o.Id,
                     State = o.State.Name,
                     Items = o.OrderItem.Select(oi => new
                     {
@@ -159,7 +203,60 @@ namespace SemestralnaPraca.Server.Controllers
             }
         }
 
+        [HttpPut("{orderId}/state")]
+        public async Task<IActionResult> UpdateOrderState(int orderId, [FromBody] UpdateOrderState model)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Používateľ nie je prihlásený." });
+            }
+
+            var currentUser = await _userManager.FindByIdAsync(userId);
+            if (currentUser == null)
+            {
+                return Unauthorized(new { message = "Neplatný používateľ." });
+            }
+
+            if (currentUser.Role != "Admin")
+            {
+                return Forbid();
+            }
+
+            var order = await _dbContext.OrdersDb
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                return NotFound(new { message = "Objednávka neexistuje." });
+            }
+
+            var newState = await _dbContext.OrderStates
+                .FirstOrDefaultAsync(s => s.Id == model.NewStateId);
+
+            if (newState == null)
+            {
+                return BadRequest(new { message = "Zadaný stav objednávky neexistuje." });
+            }
+
+            order.StateId = newState.Id;
+
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { message = "Stav objednávky bol zmenený." });
+        }
+
+        [HttpGet("states")]
+        public async Task<IActionResult> GetOrderStates()
+        {
+            var states = await _dbContext.OrderStates
+                .Select(s => new { s.Id, s.Name })
+                .ToListAsync();
+
+            return Ok(states);
+        }
     }
+
     public class CartItem
     {
         public int ProductId { get; set; }
@@ -180,5 +277,10 @@ namespace SemestralnaPraca.Server.Controllers
         public string Phone { get; set; }
 
         public List<CartItem> Items { get; set; }
+    }
+
+    public class UpdateOrderState
+    {
+        public int NewStateId {  get; set; } 
     }
 }

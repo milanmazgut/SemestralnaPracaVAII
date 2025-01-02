@@ -19,26 +19,25 @@ interface Order {
   total: number;
 }
 
-const OrdersPage: React.FC = () => {
+const AdminOrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [states, setStates] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchAllOrders = async () => {
       try {
-        const response = await axios.get("/api/Orders/userOrders", {
+        const response = await axios.get("/api/Orders/all", {
           withCredentials: true,
         });
         setOrders(response.data);
       } catch (error: any) {
-        setErrorMessage("Nepodarilo sa načítať objednávky.");
+        setErrorMessage("Nepodarilo sa načítať všetky objednávky.");
       } finally {
         setLoading(false);
       }
     };
-
     const fetchOrderStates = async () => {
       try {
         const res = await axios.get("/api/Orders/states", {
@@ -46,25 +45,31 @@ const OrdersPage: React.FC = () => {
         });
         setStates(res.data);
       } catch (error: any) {
-        setErrorMessage("Nepodarilo sa načítať objednávky.");
+        setErrorMessage("Nepodarilo sa načítať všetky objednávky.");
       }
     };
 
-    fetchOrders();
+    fetchAllOrders();
+    fetchOrderStates();
   }, []);
 
-  const handleCancelOrder = async (orderId: number) => {
+  const handleChangeOrderState = async (
+    orderId: number,
+    newStateId: number
+  ) => {
     try {
-      await axios.post(
-        `/api/Orders/cancel/${orderId}`,
-        {},
-        {
-          withCredentials: true,
-        }
+      await axios.put(
+        `/api/Orders/${orderId}/state`,
+        { newStateId },
+        { withCredentials: true }
       );
-      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+          o.id === orderId ? { ...o, stateId: newStateId } : o
+        )
+      );
     } catch (error) {
-      setErrorMessage("Nepodarilo sa stornovať objednávku.");
+      setErrorMessage("Nepodarilo sa zmeniť stav objednávky.");
     }
   };
 
@@ -82,15 +87,15 @@ const OrdersPage: React.FC = () => {
 
   return (
     <div className="container mt-5">
-      <h2>Moje objednavky</h2>
+      <h2>Administrácia – všetky objednávky</h2>
       <OrdersList
         orders={orders}
-        isAdmin={false}
-        onCancelOrder={handleCancelOrder}
+        isAdmin={true}
+        onChangeOrderState={handleChangeOrderState}
         states={states}
       />
     </div>
   );
 };
 
-export default OrdersPage;
+export default AdminOrdersPage;

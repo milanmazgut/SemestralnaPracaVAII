@@ -19,6 +19,7 @@ import AddProductPage from "./pages/AddProductPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrdersPage from "./pages/OrdersPage";
+import AdminOrdersPage from "./pages/OrdersAdminPage";
 
 function App() {
   const login = useAuthStore((state) => state.login);
@@ -57,7 +58,22 @@ function App() {
         <Route path="/kosik" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="admin/products/edit/:id" element={<EditProductPage />} />
-        <Route path="/admin/products/add" element={<AddProductPage />} />
+        <Route
+          path="/admin/products/add"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <AddProductPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <AdminOrdersPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/users"
           element={
