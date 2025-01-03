@@ -15,6 +15,7 @@ interface Order {
   date: string;
   stateId: number;
   state: string;
+  userEmail: string;
   items: OrderItem[];
   total: number;
 }

@@ -40,7 +40,7 @@ function App() {
     };
 
     checkUser();
-  }, [login]);
+  }, []);
 
   return (
     <Router>

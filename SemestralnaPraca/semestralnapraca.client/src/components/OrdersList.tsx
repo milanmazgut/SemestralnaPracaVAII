@@ -13,6 +13,7 @@ interface Order {
   date: string;
   stateId: number;
   state: string;
+  userEmail: string;
   items: OrderItem[];
   total: number;
 }
@@ -49,9 +50,14 @@ const OrdersList: React.FC<OrdersListProps> = ({
     <>
       {orders.map((order) => (
         <div className="card mb-4" key={order.id}>
-          <div className="card-header">
-            <strong>Objednávka #{order.id}</strong> –{" "}
-            {new Date(order.date).toLocaleString()}
+          <div className="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+            <div>
+              <strong>Objednávka #{order.id}</strong> –{" "}
+              {new Date(order.date).toLocaleString()}
+            </div>
+            <div className="mt-2 mt-md-0 text-md-end">
+              <strong>Email používateľa:</strong> {order.userEmail}
+            </div>
           </div>
           <div className="card-body">
             {isAdmin ? (
