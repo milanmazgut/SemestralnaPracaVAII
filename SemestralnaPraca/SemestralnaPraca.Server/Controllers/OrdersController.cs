@@ -41,6 +41,7 @@ namespace SemestralnaPraca.Server.Controllers
                 .Include(o => o.State)
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
+                .Include(o => o.User)
                 .OrderByDescending(o => o.Date)
                 .ToListAsync();
 
@@ -50,6 +51,8 @@ namespace SemestralnaPraca.Server.Controllers
                 o.Date,
                 stateId = o.StateId,
                 stateName = o.State.Name,
+                userEmail = o.User.Email,
+
                 Items = o.OrderItem.Select(oi => new
                 {
                     oi.Product.Name,

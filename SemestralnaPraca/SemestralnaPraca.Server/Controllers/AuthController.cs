@@ -90,11 +90,10 @@ namespace SemestralnaPraca.Server.Controllers
             return Unauthorized(new { message = "Neplatné prihlasovacie údaje" });
         }
 
-        [Authorize]
         [HttpGet("UserProfile")]
         public async Task<IActionResult> GetUserProfile()
         {
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(new { message = "Používateľská identita nie je k dispozícii." });
