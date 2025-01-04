@@ -4,15 +4,19 @@ import { Link } from "react-router-dom";
 import EditUserForm from "../components/EditUserForm";
 import Loader from "../components/Loader";
 
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
+interface Address {
   street: string;
   city: string;
   postalCode: string;
   phone: string;
+}
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
   role: string;
+  address: Address | null;
 }
 
 const ProfilePage: React.FC = () => {
@@ -22,11 +26,13 @@ const ProfilePage: React.FC = () => {
     id: "",
     name: "",
     email: "",
-    street: "",
-    city: "",
-    postalCode: "",
-    phone: "",
     role: "",
+    address: {
+      street: "",
+      city: "",
+      postalCode: "",
+      phone: "",
+    },
   });
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -60,24 +66,43 @@ const ProfilePage: React.FC = () => {
     setErrorMessage("");
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name.startsWith("address.")) {
+      const addressField = name.split(".")[1];
+      setEditedProfile((prev) => ({
+        ...prev,
+        address: prev.address
+          ? { ...prev.address, [addressField]: value }
+          : { street: "", city: "", postalCode: "", phone: value },
+      }));
+    } else {
+      setEditedProfile({
+        ...editedProfile,
+        [name]: value,
+      });
+    }
+  };
+
   const handleSaveClick = async () => {
     setErrorMessage("");
     try {
-      if (!profile || !profile.id) {
+      if (!profile || !editedProfile.address) {
         setErrorMessage("Neplatný používateľský profil.");
         return;
       }
 
       const response = await axios.put(
-        "/api/Auth/EditUser",
+        "/api/Auth/update",
         {
           Id: profile.id,
           Name: editedProfile.name,
           Email: editedProfile.email,
-          Street: editedProfile.street,
-          City: editedProfile.city,
-          PostalCode: editedProfile.postalCode,
-          Phone: editedProfile.phone,
+          Street: editedProfile.address.street,
+          City: editedProfile.address.city,
+          PostalCode: editedProfile.address.postalCode,
+          Phone: editedProfile.address.phone,
           Role: editedProfile.role,
         },
         { withCredentials: true }
@@ -123,16 +148,16 @@ const ProfilePage: React.FC = () => {
                 <strong>Email:</strong> {profile.email}
               </div>
               <div className="mb-3">
-                <strong>Ulica:</strong> {profile.street}
+                <strong>Ulica:</strong> {profile.address?.street || "N/A"}
               </div>
               <div className="mb-3">
-                <strong>Mesto:</strong> {profile.city}
+                <strong>Mesto:</strong> {profile.address?.city || "N/A"}
               </div>
               <div className="mb-3">
-                <strong>PSČ:</strong> {profile.postalCode}
+                <strong>PSČ:</strong> {profile.address?.postalCode || "N/A"}
               </div>
               <div className="mb-3">
-                <strong>Telefón:</strong> {profile.phone}
+                <strong>Telefón:</strong> {profile.address?.phone || "N/A"}
               </div>
               <div className="mb-3">
                 <strong>Rola:</strong> {profile.role}
@@ -155,6 +180,7 @@ const ProfilePage: React.FC = () => {
               editedProfile={editedProfile}
               handleSaveClick={handleSaveClick}
               handleCancelClick={handleCancelClick}
+              handleInputChange={handleInputChange}
             />
           )}
         </div>

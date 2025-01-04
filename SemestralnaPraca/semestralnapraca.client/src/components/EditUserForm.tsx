@@ -1,24 +1,30 @@
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
+interface Address {
   street: string;
   city: string;
   postalCode: string;
   phone: string;
+}
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
   role: string;
+  address: Address | null;
 }
 
 interface EditUserFormProps {
   editedProfile: UserProfile;
   handleSaveClick: () => void;
   handleCancelClick: () => void;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const EditUserForm: React.FC<EditUserFormProps> = ({
   editedProfile,
   handleSaveClick,
   handleCancelClick,
+  handleInputChange,
 }) => {
   return (
     <div className="card shadow-sm p-4 mb-4">
@@ -32,6 +38,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
           name="name"
           id="name"
           value={editedProfile.name}
+          onChange={handleInputChange}
         />
       </div>
 
@@ -45,59 +52,64 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
           name="email"
           id="email"
           value={editedProfile.email}
+          onChange={handleInputChange}
         />
       </div>
 
       <div className="row">
         <div className="col-md-6 mb-3">
-          <label htmlFor="street" className="form-label">
+          <label htmlFor="address.street" className="form-label">
             Ulica:
           </label>
           <input
             type="text"
             className="form-control"
-            name="street"
-            id="street"
-            value={editedProfile.street}
+            name="address.street"
+            id="address.street"
+            value={editedProfile.address?.street || ""}
+            onChange={handleInputChange}
           />
         </div>
         <div className="col-md-6 mb-3">
-          <label htmlFor="city" className="form-label">
+          <label htmlFor="address.city" className="form-label">
             Mesto:
           </label>
           <input
             type="text"
             className="form-control"
-            name="city"
-            id="city"
-            value={editedProfile.city}
+            name="address.city"
+            id="address.city"
+            value={editedProfile.address?.city || ""}
+            onChange={handleInputChange}
           />
         </div>
       </div>
 
       <div className="row">
         <div className="col-md-6 mb-3">
-          <label htmlFor="postalCode" className="form-label">
+          <label htmlFor="address.postalCode" className="form-label">
             PSČ:
           </label>
           <input
             type="text"
             className="form-control"
-            name="postalCode"
-            id="postalCode"
-            value={editedProfile.postalCode}
+            name="address.postalCode"
+            id="address.postalCode"
+            value={editedProfile.address?.postalCode || ""}
+            onChange={handleInputChange}
           />
         </div>
         <div className="col-md-6 mb-3">
-          <label htmlFor="phone" className="form-label">
+          <label htmlFor="address.phone" className="form-label">
             Telefón:
           </label>
           <input
             type="text"
             className="form-control"
-            name="phone"
-            id="phone"
-            value={editedProfile.phone}
+            name="address.phone"
+            id="address.phone"
+            value={editedProfile.address?.phone || ""}
+            onChange={handleInputChange}
           />
         </div>
       </div>

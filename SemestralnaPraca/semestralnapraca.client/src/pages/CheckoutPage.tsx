@@ -3,6 +3,20 @@ import { useNavigate } from "react-router-dom";
 import useCartStore from "../zustand/cartStore";
 import useAuthStore from "../zustand/authStore";
 import axios from "axios";
+import Loader from "../components/Loader";
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  address?: {
+    street: string;
+    city: string;
+    postalCode: string;
+    phone: string;
+  } | null;
+}
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -15,19 +29,46 @@ const CheckoutPage: React.FC = () => {
   const [city, setCity] = useState<string>("");
   const [zip, setZip] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
 
   // Obsah kosika
   const items = useCartStore((state) => state.items);
   const clearCart = useCartStore((state) => state.clearCart);
 
-  // ked je user k dispozicii vypln meno a email
+  const fetchUserProfile = async () => {
+    try {
+      const response = await axios.get<UserProfile>("/api/Auth/UserProfile");
+      const userProfile = response.data;
+      setFullName(userProfile.name || "");
+      setEmail(userProfile.email || "");
+
+      if (userProfile.address) {
+        setAddress(userProfile.address.street || "");
+        setCity(userProfile.address.city || "");
+        setZip(userProfile.address.postalCode || "");
+        setPhone(userProfile.address.phone || "");
+      } else {
+        setAddress("");
+        setCity("");
+        setZip("");
+        setPhone("");
+      }
+    } catch (err) {
+      console.error("Chyba pri načítaní profilu používateľa:", err);
+      setError(
+        "Nastala chyba pri načítaní vašich údajov. Prosím, skúste to neskôr."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user) {
-      setFullName(user.name || "");
-      setEmail(user.email || "");
+      fetchUserProfile();
     } else {
-      setFullName("");
-      setEmail("");
+      setLoading(false);
     }
   }, [user]);
 
@@ -62,12 +103,22 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <div className="container mt-5">
       <h2>Objednávka</h2>
       <p className="text-muted">
         Vyplňte prosím vaše fakturačné údaje a adresu.
       </p>
+
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="row g-3">
         <div className="col-md-6">
