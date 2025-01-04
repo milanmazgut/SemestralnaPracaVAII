@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SemestralnaPraca.Server.Data;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace SemestralnaPraca.Server.Controllers
@@ -42,6 +43,7 @@ namespace SemestralnaPraca.Server.Controllers
                 .Include(o => o.OrderItem)
                     .ThenInclude(oi => oi.Product)
                 .Include(o => o.User)
+                .Include(o => o.Address)
                 .OrderByDescending(o => o.Date)
                 .ToListAsync();
 
@@ -52,6 +54,14 @@ namespace SemestralnaPraca.Server.Controllers
                 stateId = o.StateId,
                 stateName = o.State.Name,
                 userEmail = o.User.Email,
+
+                address = new
+                {
+                    o.Address.Street,
+                    o.Address.City,
+                    o.Address.PostalCode,
+                    o.Address.Phone
+                },
 
                 Items = o.OrderItem.Select(oi => new
                 {
@@ -86,46 +96,94 @@ namespace SemestralnaPraca.Server.Controllers
                         UserName = model.Email,
                         Email = model.Email,
                         Name = model.FullName,
-                        Adress = $"{model.Address}, {model.City} {model.Zip}"
+                        Role = "User"
                     };
 
                     var createResult = await _userManager.CreateAsync(user, "superTajneHeslo123");
                     if (!createResult.Succeeded)
                     {
-                        return BadRequest(new { message = "Nepodarilo sa vytvoriť používateľa." });
+                        return BadRequest(new { message = "Nepodarilo sa vytvoriť používateľa.", errors = createResult.Errors });
                     }
 
+                    var userAddress = new Address
+                    {
+                        Street = model.Address,
+                        City = model.City,
+                        PostalCode = model.Zip,
+                        Phone = model.Phone
+                    };
+
+                    _dbContext.AddressDB.Add(userAddress);
+                    await _dbContext.SaveChangesAsync();
+
+                    user.AddressId = userAddress.Id;
+                    var updateResult = await _userManager.UpdateAsync(user);
+                    if (!updateResult.Succeeded)
+                    {
+                        return BadRequest(new { message = "Nepodarilo sa aktualizovať adresu používateľa."});
+                    }
                 }
                 else
                 {
-                    user.Adress = $"{model.Address}, {model.City} {model.Zip}";
-                    var updateResult = await _userManager.UpdateAsync(user);
+                    if (user.AddressId == null)
+                    {
+                        var newAddress = new Address
+                        {
+                            Street = model.Address,
+                            City = model.City,
+                            PostalCode = model.Zip,
+                            Phone = model.Phone
+                        };
 
+                        _dbContext.AddressDB.Add(newAddress);
+                        await _dbContext.SaveChangesAsync();
+
+                        user.AddressId = newAddress.Id;
+                    }
+                    else
+                    {
+                        var existingAddress = await _dbContext.AddressDB.FindAsync(user.AddressId);
+                        if (existingAddress != null)
+                        {
+                            existingAddress.Street = model.Address;
+                            existingAddress.City = model.City;
+                            existingAddress.PostalCode = model.Zip;
+                            existingAddress.Phone = model.Phone;
+
+                            _dbContext.AddressDB.Update(existingAddress);
+                            await _dbContext.SaveChangesAsync();
+                        }
+                    }
                 }
 
+                var orderAddress = new Address
+                {
+                    Street = model.Address,
+                    City = model.City,
+                    PostalCode = model.Zip,
+                    Phone = model.Phone
+                };
+                _dbContext.AddressDB.Add(orderAddress);
+                await _dbContext.SaveChangesAsync();
 
-                // 2. Vytvoríme objednávku
                 var objednavka = new Order
                 {
                     UserId = user.Id,
                     Date = DateTime.Now,
-                    StateId = 1
+                    StateId = 1,
+                    AddressId = orderAddress.Id
                 };
                 _dbContext.OrdersDb.Add(objednavka);
                 await _dbContext.SaveChangesAsync();
 
-                // 3. Vytvoríme položky objednávky
                 foreach (var item in model.Items)
                 {
-
-
                     var produkt = await _dbContext.ProductsDb
-                        .FirstOrDefaultAsync();
+                        .FirstOrDefaultAsync(p => p.Id == item.ProductId);
 
                     if (produkt == null)
                     {
-                        return BadRequest(new { message = "Produkt neexistuje." });
-
+                        return BadRequest(new { message = $"Produkt s ID {item.ProductId} neexistuje." });
                     }
 
                     var orderItem = new OrderItem
@@ -177,6 +235,7 @@ namespace SemestralnaPraca.Server.Controllers
                     .Include(o => o.OrderItem)
                         .ThenInclude(oi => oi.Product)
                     .Include(o => o.State)
+                    .Include(o => o.Address)
                     .Where(o => o.UserId == user.Id)
                     .OrderByDescending(o => o.Date)
                     .ToListAsync();
@@ -187,6 +246,15 @@ namespace SemestralnaPraca.Server.Controllers
                     o.Date,
                     stateId = o.Id,
                     State = o.State.Name,
+
+                    address = o.Address != null ? new
+                    {
+                        o.Address.Street,
+                        o.Address.City,
+                        o.Address.PostalCode,
+                        o.Address.Phone
+                    } : null,
+
                     Items = o.OrderItem.Select(oi => new
                     {
                         oi.Product.Name,
@@ -314,15 +382,29 @@ namespace SemestralnaPraca.Server.Controllers
 
     public class CreateOrder
     {
+        [Required]
         public string FullName { get; set; }
+
+        [Required]
+        [EmailAddress(ErrorMessage = "Neplatný formát emailu.")]
         public string Email { get; set; }
+
+        [Required]
         public string Address { get; set; }
+
+        [Required]
         public string City { get; set; }
+
+        [Required]
         public string Zip { get; set; }
+
+        [Required]
+        [Phone(ErrorMessage = "Neplatný formát telefónneho čísla.")]
         public string Phone { get; set; }
 
         public List<CartItem> Items { get; set; }
     }
+
 
     public class UpdateOrderState
     {

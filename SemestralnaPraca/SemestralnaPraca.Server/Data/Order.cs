@@ -14,6 +14,9 @@ namespace SemestralnaPraca.Server.Data
 
         public DateTime Date { get; set; } = DateTime.Now;
 
+        public int? AddressId { get; set; }
+        public Address? Address { get; set; }
+
         public int StateId { get; set; }
         [ForeignKey(nameof(StateId))]
         public OrderState State { get; set; }

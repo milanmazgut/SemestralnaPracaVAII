@@ -14,12 +14,15 @@ namespace SemestralnaPraca.Server.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ApplicationDBContext _dbContext;
 
         public AuthController(UserManager<ApplicationUser> userManager,
-                                 SignInManager<ApplicationUser> signInManager)
+                                 SignInManager<ApplicationUser> signInManager,
+                                    ApplicationDBContext dbContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _dbContext = dbContext;
         }
 
         [Authorize]
@@ -99,19 +102,29 @@ namespace SemestralnaPraca.Server.Controllers
                 return Unauthorized(new { message = "Používateľská identita nie je k dispozícii." });
             }
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.Users
+                .Include(u => u.Adress)
+                .FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
                 return NotFound(new { message = "Používateľ neexistuje." });
             }
 
+
             return Ok(new
             {
+                id = user.Id,
                 name = user.Name,
                 email = user.Email,
                 role = user.Role,
-                adress = user.Adress
-            });
+                address = user.Adress != null ? new
+                {
+                    street = user.Adress.Street,
+                    city = user.Adress.City,
+                    postalCode = user.Adress.PostalCode,
+                    phone = user.Adress.Phone
+                } : null
+            }) ;
         }
 
         [Authorize]
@@ -189,6 +202,89 @@ namespace SemestralnaPraca.Server.Controllers
 
             return BadRequest(ModelState);
         }
+
+        //uprava vlastneho profilu
+        [Authorize]
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UserProfileModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized(new {message = "Pou6ívatel nieje prihlásený"});
+            }
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null)
+                return NotFound(new { message = "Používateľ neexistuje." });
+
+            
+            if (currentUserId != model.Id)
+            {
+                return Forbid();
+            }
+
+            // Overenie duplicity emailu
+            if (!string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var userWithSameEmail = await _userManager.FindByEmailAsync(model.Email);
+                if (userWithSameEmail != null && userWithSameEmail.Id != user.Id)
+                {
+                    return Conflict(new { message = "Používateľ s týmto emailom už existuje." });
+                }
+            }
+
+            user.Name = model.Name;
+            user.Email = model.Email;
+            user.UserName = model.Email;
+
+            if (user.AddressId == null)
+            {
+                var newAddress = new Address
+                {
+                    Street = model.Street,
+                    City = model.City,
+                    PostalCode = model.PostalCode,
+                    Phone = model.Phone
+                };
+
+                _dbContext.AddressDB.Add(newAddress);
+                await _dbContext.SaveChangesAsync();
+
+                user.AddressId = newAddress.Id;
+            }
+            else
+            {
+                var existingAddress = await _dbContext.AddressDB.FindAsync(user.AddressId);
+                if (existingAddress == null)
+                {
+                    return NotFound(new { message = "Pôvodná adresa sa nenašla." });
+                }
+                existingAddress.Street = model.Street;
+                existingAddress.City = model.City;
+                existingAddress.PostalCode = model.PostalCode;
+                existingAddress.Phone = model.Phone;
+
+                _dbContext.AddressDB.Update(existingAddress);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return BadRequest(ModelState);
+            }
+
+            return Ok(new { message = "Profil bol úspešne aktualizovaný." });
+        }
+
 
         [Authorize]
         [HttpDelete("DeleteUser/{id}")]
@@ -276,6 +372,33 @@ namespace SemestralnaPraca.Server.Controllers
             [Required(ErrorMessage = "Rola je povinná.")]
             [RegularExpression("Admin|User", ErrorMessage = "Rola môže byť 'Admin' alebo 'User'.")]
             public string Role { get; set; }
+        }
+
+        public class UserProfileModel
+        {
+            [Required]
+            public string Id { get; set; }
+
+            [Required]
+            public string Name { get; set; }
+
+            [EmailAddress]
+            [Required]
+            public string Email { get; set; }
+
+            [Required]
+            public string Street { get; set; }
+
+            [Required]
+            public string City { get; set; }
+
+            [Required]
+            public string PostalCode { get; set; }
+
+            [Required]
+            [Phone(ErrorMessage = "Neplatný formát telefónneho čísla.")]
+
+            public string Phone { get; set; }
         }
 
     }
