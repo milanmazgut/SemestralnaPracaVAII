@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import EditUserForm from "../components/EditUserForm";
+import Loader from "../components/Loader";
 
 interface UserProfile {
   id: string;
@@ -44,7 +45,6 @@ const ProfilePage: React.FC = () => {
     fetchProfile();
   }, []);
 
-  // Klik na tlačidlo "Upraviť"
   const handleEditClick = () => {
     if (profile) {
       setEditedProfile(profile);
@@ -52,7 +52,6 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Klik na tlačidlo "Zrušiť" v editačnom móde
   const handleCancelClick = () => {
     if (profile) {
       setEditedProfile(profile);
@@ -61,7 +60,6 @@ const ProfilePage: React.FC = () => {
     setErrorMessage("");
   };
 
-  // Klik na tlačidlo "Uložiť"
   const handleSaveClick = async () => {
     setErrorMessage("");
     try {
@@ -102,16 +100,8 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  // Ak ešte nemáme načítaný profil, zobrazíme loader
   if (!profile) {
-    return (
-      <div className="container mt-5 text-center">
-        <div className="spinner-border" role="status">
-          <span className="visually-hidden">Načítavam...</span>
-        </div>
-        <p className="mt-3">Načítavam profil...</p>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

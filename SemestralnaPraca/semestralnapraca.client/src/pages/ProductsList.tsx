@@ -3,6 +3,7 @@ import axios from "axios";
 import ProductCardWithImage from "../components/ProductCardWithImage";
 import { useNavigate } from "react-router-dom";
 import useAuthStore from "../zustand/authStore";
+import Loader from "../components/Loader";
 
 /** Rozhranie produktu */
 interface Product {
@@ -86,7 +87,7 @@ const ProductList: React.FC = () => {
   });
 
   if (isLoading) {
-    return <div>Načítavanie produktov...</div>;
+    return <Loader />;
   }
 
   if (error) {

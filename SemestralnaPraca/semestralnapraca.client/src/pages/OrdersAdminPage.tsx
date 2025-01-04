@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import OrdersList from "../components/OrdersList";
+import Loader from "../components/Loader";
 
 interface OrderItem {
   name: string;
@@ -76,7 +77,7 @@ const AdminOrdersPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="container mt-5">Načítavam objednávky...</div>;
+    return <Loader />;
   }
 
   if (errorMessage) {
