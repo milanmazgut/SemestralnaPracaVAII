@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using SemestralnaPraca.Server.Data;
 using SemestralnaPraca.Server.Identity;
 
@@ -53,6 +54,16 @@ var app = builder.Build();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
+
+
+// UmoûnÌme, aby .NET Core vedel obsluhovaù statickÈ s˙bory z prieËinka "Uploads"
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "Uploads")),
+    RequestPath = "/uploads"
+});
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

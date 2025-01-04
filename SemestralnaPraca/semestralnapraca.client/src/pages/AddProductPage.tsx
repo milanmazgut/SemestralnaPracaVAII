@@ -1,26 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import useAuthStore from "../zustand/authStore";
 
-/** Rozhranie pre nový produkt */
 interface NewProduct {
   name: string;
   description: string;
   imageUrl: string;
   category: string;
-  price?: number; // ak potrebuješ cenu
+  price?: number;
 }
 
 const AddProductPage: React.FC = () => {
-  // Kontrola, či je používateľ admin
-  const { user } = useAuthStore();
-  const isAdmin = user?.role === "Admin";
-
-  // React Router navigácia
   const navigate = useNavigate();
 
-  // Lokálny stav pre formulár
   const [product, setProduct] = useState<NewProduct>({
     name: "",
     description: "",
@@ -29,17 +21,10 @@ const AddProductPage: React.FC = () => {
     price: 0,
   });
 
-  // Chybové hlásenie (ak zlyhá request)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Ak nie je admin, môžeme buď zobraziť 403 správu, alebo presmerovať
-  if (!isAdmin) {
-    return (
-      <div className="container mt-4">Nemáte oprávnenie pridať produkt.</div>
-    );
-  }
-
-  /** Spracovanie zmien v inputoch */
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -52,14 +37,51 @@ const AddProductPage: React.FC = () => {
     }));
   };
 
-  /** Odoslanie formulára na server */
+  const handleDivClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setSelectedFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     try {
-      await axios.post("/api/Product/add", product);
-      // Po úspešnom pridaní presmerujeme na /products alebo kam potrebuješ
+      const formData = new FormData();
+
+      formData.append("name", product.name);
+      formData.append("description", product.description);
+      formData.append("category", product.category);
+      formData.append("price", product.price?.toString() || "0");
+      formData.append("imageUrl", product.imageUrl);
+      if (selectedFile) {
+        formData.append("file", selectedFile);
+      }
+
+      await axios.post("/api/Product/add", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       navigate("/produkty");
     } catch (err: any) {
       console.error("Chyba pri pridávaní produktu:", err);
@@ -74,7 +96,6 @@ const AddProductPage: React.FC = () => {
       {error && <div className="alert alert-danger">{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        {/* Názov */}
         <div className="mb-3">
           <label htmlFor="name" className="form-label">
             Názov produktu
@@ -90,7 +111,6 @@ const AddProductPage: React.FC = () => {
           />
         </div>
 
-        {/* Popis */}
         <div className="mb-3">
           <label htmlFor="description" className="form-label">
             Popis
@@ -105,7 +125,6 @@ const AddProductPage: React.FC = () => {
           />
         </div>
 
-        {/* URL obrázka */}
         <div className="mb-3">
           <label htmlFor="imageUrl" className="form-label">
             URL obrázka
@@ -120,7 +139,26 @@ const AddProductPage: React.FC = () => {
           />
         </div>
 
-        {/* Kategória */}
+        <div
+          className="dropzone mb-3"
+          onClick={handleDivClick}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
+          {selectedFile ? (
+            <p>{selectedFile.name}</p>
+          ) : (
+            <p>Presuň sem obrázok alebo klikni a vyber súbor</p>
+          )}
+        </div>
+        <input
+          type="file"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          accept="image/*"
+          onChange={handleFileSelect}
+        />
+
         <div className="mb-3">
           <label htmlFor="category" className="form-label">
             Kategória
@@ -145,7 +183,6 @@ const AddProductPage: React.FC = () => {
           </select>
         </div>
 
-        {/* Cena (ak používaš) */}
         <div className="mb-3">
           <label htmlFor="price" className="form-label">
             Cena
@@ -170,8 +207,7 @@ const AddProductPage: React.FC = () => {
           className="btn btn-secondary ms-2"
           onClick={() => navigate("/produkty")}
         >
-          {" "}
-          Zrušiť{" "}
+          Zrušiť
         </button>
       </form>
     </div>

@@ -119,3 +119,14 @@ body {
     rgba(0, 0, 0, 0.6);
   background-blend-mode: overlay;
 }
+
+.dropzone {
+  border: 2px;
+  border-style: dashed;
+  border-color: #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}

@@ -39,10 +39,10 @@ namespace SemestralnaPraca.Server.Data
             var products = await _dbContext.ProductsDb.ToListAsync();
             return Ok(products);
         }
-        
+
         // Pridá nový produkt (iba Admin).
         [HttpPost("add")]
-        public async Task<ActionResult> AddProduct([FromBody] Product newProduct)
+        public async Task<ActionResult> AddProduct([FromForm] Product newProduct, IFormFile? file)
         {
             // Zisti, či je používateľ prihlásený
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -63,6 +63,43 @@ namespace SemestralnaPraca.Server.Data
                 return BadRequest(new { message = "Neplatné dáta o produkte." });
             }
 
+            // Ak je subor, ulozi ho na disk
+            if (file != null && file.Length > 0)
+            {
+                try
+                {
+                    // Vygeneruj unikatny názov
+                    var fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
+
+                    // Cesta k priecinku
+                    var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    
+                    var filePath = Path.Combine(uploadPath, fileName);
+
+                    // Skopiruj na disk
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    newProduct.ImageUrl = "/uploads/" + fileName;
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(500, new
+                    {
+                        message = "Chyba pri ukladaní súboru.",
+                        detail = ex.Message
+                    });
+                }
+            }
+
+            // uloz do DB
             try
             {
                 _dbContext.ProductsDb.Add(newProduct);
