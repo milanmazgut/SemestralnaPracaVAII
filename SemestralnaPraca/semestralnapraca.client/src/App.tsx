@@ -20,6 +20,7 @@ import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrdersPage from "./pages/OrdersPage";
 import AdminOrdersPage from "./pages/OrdersAdminPage";
+import ContactPage from "./pages/ContactPage";
 
 function App() {
   const login = useAuthStore((state) => state.login);
@@ -47,17 +48,40 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/kontakt" element={<ContactPage />} />
         <Route path="/strechy" element={<RoofDetailPage />} />
         <Route path="/kominy" element={<ChimneyDetailPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/produkty" element={<ProductsList />} />
         <Route path="/detail/:id" element={<DetailPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/mojeObjednavky" element={<OrdersPage />} />
         <Route path="/kosik" element={<CartPage />} />
-        <Route path="checkout" element={<CheckoutPage />} />
-        <Route path="admin/products/edit/:id" element={<EditProductPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mojeObjednavky"
+          element={
+            <ProtectedRoute>
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/products/edit/:id"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <EditProductPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin/products/add"
           element={

@@ -54,6 +54,12 @@ body {
   border-color: #f2e9e4;
 }
 
+.btn-outline-primary {
+  margin: 2%;
+  color: #00c2d1;
+  border-color: #00c2d1;
+}
+
 .btn-secondary {
   margin: 2%;
   color: #f2e9e4;
@@ -106,4 +112,10 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.contact-left-col {
+  background: url("images/komin.jpg") center center / cover no-repeat,
+    rgba(0, 0, 0, 0.6);
+  background-blend-mode: overlay;
 }
