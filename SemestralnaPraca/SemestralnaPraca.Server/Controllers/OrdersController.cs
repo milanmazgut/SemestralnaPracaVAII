@@ -206,7 +206,7 @@ namespace SemestralnaPraca.Server.Controllers
             }
         }
 
-        [HttpPut("{orderId}/state")]
+        [HttpPut("state/{orderId}")]
         public async Task<IActionResult> UpdateOrderState(int orderId, [FromBody] UpdateOrderState model)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -257,6 +257,48 @@ namespace SemestralnaPraca.Server.Controllers
                 .ToListAsync();
 
             return Ok(states);
+        }
+
+
+        [HttpPut("cancel/{orderId}")]
+        public async Task<IActionResult> CancelOrder(int orderId)
+        {
+            // Zistíme ID prihláseného používateľa
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Používateľ nie je prihlásený." });
+            }
+
+            // Načítame používateľa z databázy
+            var currentUser = await _userManager.FindByIdAsync(userId);
+            if (currentUser == null)
+            {
+                return Unauthorized(new { message = "Neplatný používateľ." });
+            }
+
+
+            var order = await _dbContext.OrdersDb
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                return NotFound(new { message = "Objednávka neexistuje." });
+            }
+
+            if (order.UserId != userId && currentUser.Role != "Admin")
+            {
+                return Forbid();
+            }
+
+            if (order.StateId != 1)
+            {
+                return BadRequest(new {message = "Objednavku už nemožno zrušiť"});
+            }
+            order.StateId = 5; 
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { message = "Objednávka bola úspešne zrušená." });
         }
     }
 

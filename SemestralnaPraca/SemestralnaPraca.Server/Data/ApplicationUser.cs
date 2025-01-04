@@ -8,7 +8,7 @@ namespace SemestralnaPraca.Server.Data
 
         public string Role {  get; set; }
 
-        public string Adress { get; set; }
+        public string? Adress { get; set; }
 
         public ICollection<Order> Orders { get; set; }
 

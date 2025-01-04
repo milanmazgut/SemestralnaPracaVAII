@@ -60,7 +60,7 @@ const AdminOrdersPage: React.FC = () => {
   ) => {
     try {
       await axios.put(
-        `/api/Orders/${orderId}/state`,
+        `/api/Orders/state/${orderId}`,
         { newStateId },
         { withCredentials: true }
       );

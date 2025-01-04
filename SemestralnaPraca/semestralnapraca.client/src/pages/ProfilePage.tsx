@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import EditUserForm from "../components/EditUserForm";
 
 interface UserProfile {
   id: string;
   name: string;
   email: string;
-  address: string;
+  street: string;
+  city: string;
+  postalCode: string;
+  phone: string;
   role: string;
 }
 
@@ -17,7 +21,10 @@ const ProfilePage: React.FC = () => {
     id: "",
     name: "",
     email: "",
-    address: "",
+    street: "",
+    city: "",
+    postalCode: "",
+    phone: "",
     role: "",
   });
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -37,6 +44,7 @@ const ProfilePage: React.FC = () => {
     fetchProfile();
   }, []);
 
+  // Klik na tlačidlo "Upraviť"
   const handleEditClick = () => {
     if (profile) {
       setEditedProfile(profile);
@@ -44,6 +52,7 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  // Klik na tlačidlo "Zrušiť" v editačnom móde
   const handleCancelClick = () => {
     if (profile) {
       setEditedProfile(profile);
@@ -52,9 +61,9 @@ const ProfilePage: React.FC = () => {
     setErrorMessage("");
   };
 
+  // Klik na tlačidlo "Uložiť"
   const handleSaveClick = async () => {
     setErrorMessage("");
-
     try {
       if (!profile || !profile.id) {
         setErrorMessage("Neplatný používateľský profil.");
@@ -67,7 +76,10 @@ const ProfilePage: React.FC = () => {
           Id: profile.id,
           Name: editedProfile.name,
           Email: editedProfile.email,
-          Address: editedProfile.address,
+          Street: editedProfile.street,
+          City: editedProfile.city,
+          PostalCode: editedProfile.postalCode,
+          Phone: editedProfile.phone,
           Role: editedProfile.role,
         },
         { withCredentials: true }
@@ -90,108 +102,73 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditedProfile((prev) => ({ ...prev, [name]: value }));
-  };
-
+  // Ak ešte nemáme načítaný profil, zobrazíme loader
   if (!profile) {
-    return <div className="container mt-5">Načítavam profil...</div>;
+    return (
+      <div className="container mt-5 text-center">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Načítavam...</span>
+        </div>
+        <p className="mt-3">Načítavam profil...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="container-lg mt-5">
-      <h2>Môj profil</h2>
-      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
+    <div className="container my-5">
+      <div className="row justify-content-center">
+        <div className="col-md-8 col-lg-6">
+          <h2 className="mb-4 text-center">Môj profil</h2>
 
-      {!editMode ? (
-        <div className="card p-4">
-          <p>
-            <strong>Meno:</strong> {profile.name}
-          </p>
-          <p>
-            <strong>Email:</strong> {profile.email}
-          </p>
-          <p>
-            <strong>Adresa:</strong> {profile.address}
-          </p>
-          <p>
-            <strong>Rola:</strong> {profile.role}
-          </p>
-          <div className="d-flex">
-            <button className="btn btn-primary" onClick={handleEditClick}>
-              Upraviť
-            </button>
-            <Link className="btn btn-primary" to="/mojeObjednavky">
-              Moje objednavky
-            </Link>
-          </div>
+          {errorMessage && (
+            <div className="alert alert-danger">{errorMessage}</div>
+          )}
+
+          {!editMode ? (
+            <div className="card shadow-sm p-4 mb-4">
+              <div className="mb-3">
+                <strong>Meno:</strong> {profile.name}
+              </div>
+              <div className="mb-3">
+                <strong>Email:</strong> {profile.email}
+              </div>
+              <div className="mb-3">
+                <strong>Ulica:</strong> {profile.street}
+              </div>
+              <div className="mb-3">
+                <strong>Mesto:</strong> {profile.city}
+              </div>
+              <div className="mb-3">
+                <strong>PSČ:</strong> {profile.postalCode}
+              </div>
+              <div className="mb-3">
+                <strong>Telefón:</strong> {profile.phone}
+              </div>
+              <div className="mb-3">
+                <strong>Rola:</strong> {profile.role}
+              </div>
+
+              <div className="d-flex justify-content-between mt-4">
+                <button
+                  className="btn btn-primary me-2"
+                  onClick={handleEditClick}
+                >
+                  Upraviť
+                </button>
+                <Link className="btn btn-primary" to="/mojeObjednavky">
+                  Moje objednávky
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <EditUserForm
+              editedProfile={editedProfile}
+              handleSaveClick={handleSaveClick}
+              handleCancelClick={handleCancelClick}
+            />
+          )}
         </div>
-      ) : (
-        <div className="card p-4">
-          <div className="mb-3">
-            <label htmlFor="name" className="form-label">
-              Meno:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              name="name"
-              id="name"
-              value={editedProfile.name}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">
-              Email:
-            </label>
-            <input
-              type="email"
-              className="form-control"
-              name="email"
-              id="email"
-              value={editedProfile.email}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="address" className="form-label">
-              Adresa:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              name="address"
-              id="address"
-              value={editedProfile.address}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="role" className="form-label">
-              Rola:
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              name="role"
-              id="role"
-              value={editedProfile.role}
-              onChange={handleChange}
-              disabled
-            />
-          </div>
-
-          <button className="btn btn-success" onClick={handleSaveClick}>
-            Uložiť
-          </button>
-
-          <button className="btn btn-secondary" onClick={handleCancelClick}>
-            Zrušiť
-          </button>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

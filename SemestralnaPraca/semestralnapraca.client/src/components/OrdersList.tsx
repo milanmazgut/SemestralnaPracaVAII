@@ -55,9 +55,11 @@ const OrdersList: React.FC<OrdersListProps> = ({
               <strong>Objednávka #{order.id}</strong> –{" "}
               {new Date(order.date).toLocaleString()}
             </div>
-            <div className="mt-2 mt-md-0 text-md-end">
-              <strong>Email používateľa:</strong> {order.userEmail}
-            </div>
+            {isAdmin && order.userEmail !== "" ? (
+              <div className="mt-2 mt-md-0 text-md-end">
+                <strong>Email používateľa:</strong> {order.userEmail}
+              </div>
+            ) : null}
           </div>
           <div className="card-body">
             {isAdmin ? (

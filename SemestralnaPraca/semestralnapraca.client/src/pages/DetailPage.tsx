@@ -68,7 +68,10 @@ const DetailPage: React.FC = () => {
       }
 
       // Príklad pre 3 parametre (dĺžka, šírka, výška)
-      if (product.numberOfParameters === 3) {
+      if (
+        product.numberOfParameters === 3 ||
+        product.numberOfParameters === 4
+      ) {
         const [lengthCm, widthCm, heightCm] = numericVals;
 
         // Výpočet plochy kvádra bez spodnej strany

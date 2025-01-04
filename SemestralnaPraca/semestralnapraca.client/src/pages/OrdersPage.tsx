@@ -15,6 +15,7 @@ interface Order {
   date: string;
   stateId: number;
   state: string;
+  userEmail: string;
   items: OrderItem[];
   total: number;
 }
@@ -55,15 +56,27 @@ const OrdersPage: React.FC = () => {
   }, []);
 
   const handleCancelOrder = async (orderId: number) => {
+    const confirmCancel = window.confirm(
+      "Ste si istý, že chcete stornovať túto objednávku?"
+    );
+
+    if (!confirmCancel) {
+      return;
+    }
+
     try {
-      await axios.post(
+      await axios.put(
         `/api/Orders/cancel/${orderId}`,
-        {},
+        { orderId },
         {
           withCredentials: true,
         }
       );
-      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, state: "Stornovaná" } : order
+        )
+      );
     } catch (error) {
       setErrorMessage("Nepodarilo sa stornovať objednávku.");
     }
