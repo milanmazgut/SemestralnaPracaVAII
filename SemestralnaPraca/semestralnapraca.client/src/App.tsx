@@ -21,6 +21,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import OrdersPage from "./pages/OrdersPage";
 import AdminOrdersPage from "./pages/OrdersAdminPage";
 import ContactPage from "./pages/ContactPage";
+import AllMessagesPage from "./pages/AllMessagesPage";
 
 function App() {
   const login = useAuthStore((state) => state.login);
@@ -78,6 +79,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="Admin">
               <EditProductPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/spravy"
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <AllMessagesPage />
             </ProtectedRoute>
           }
         />

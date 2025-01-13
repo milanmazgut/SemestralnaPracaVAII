@@ -91,11 +91,21 @@ const Navbar = () => {
                   </li>
 
                   {user?.role === "Admin" && (
-                    <li>
-                      <Link className="dropdown-item" to="/users">
-                        Správa používateľov
-                      </Link>
-                    </li>
+                    <>
+                      <li>
+                        <Link className="dropdown-item" to="/admin/spravy">
+                          Správy od zákazníkov
+                        </Link>
+                      </li>
+                      <li>
+                        <hr className="dropdown-divider" />
+                      </li>
+                      <li>
+                        <Link className="dropdown-item" to="/users">
+                          Správa používateľov
+                        </Link>
+                      </li>
+                    </>
                   )}
                   <li>
                     <hr className="dropdown-divider" />

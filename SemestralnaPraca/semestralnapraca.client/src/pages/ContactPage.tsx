@@ -1,6 +1,46 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 const ContactSection: React.FC = () => {
+  // Lokálny stav pre polia formulára
+  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccessMsg("");
+    setErrorMsg("");
+
+    try {
+      const mess = {
+        fullName: fullname,
+        email: email,
+        phone: phone,
+        subject: subject,
+        message: message,
+      };
+
+      const response = await axios.post("/api/ContactMessage/add", mess);
+      if (response.status === 200) {
+        setSuccessMsg("Správa bola úspešne odoslaná!");
+        setFullname("");
+        setEmail("");
+        setPhone("");
+        setSubject("");
+        setMessage("");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (error) {
+      setErrorMsg("Nepodarilo sa odoslať správu.");
+      console.error("Chyba pri odosielaní správy:", error);
+    }
+  };
+
   return (
     <section className="contact-section py-3 py-md-5 py-xl-8">
       <div className="container">
@@ -85,12 +125,19 @@ const ContactSection: React.FC = () => {
                   <div className="col-12 col-lg-6">
                     <div className="row align-items-lg-center h-100">
                       <div className="col-12">
-                        <form
-                          action="#!"
-                          method="post"
-                          // onSubmit={handleFormSubmit}
-                        >
+                        <form onSubmit={handleFormSubmit}>
                           <div className="row gy-4 gy-xl-5 p-4 p-xl-5">
+                            {successMsg && (
+                              <div className="alert alert-success">
+                                {successMsg}
+                              </div>
+                            )}
+                            {errorMsg && (
+                              <div className="alert alert-danger">
+                                {errorMsg}
+                              </div>
+                            )}
+
                             <div className="col-12">
                               <label htmlFor="fullname" className="form-label">
                                 Celé meno <span className="text-danger">*</span>
@@ -101,6 +148,8 @@ const ContactSection: React.FC = () => {
                                 id="fullname"
                                 name="fullname"
                                 required
+                                value={fullname}
+                                onChange={(e) => setFullname(e.target.value)}
                               />
                             </div>
 
@@ -118,6 +167,8 @@ const ContactSection: React.FC = () => {
                                   id="email"
                                   name="email"
                                   required
+                                  value={email}
+                                  onChange={(e) => setEmail(e.target.value)}
                                 />
                               </div>
                             </div>
@@ -135,6 +186,8 @@ const ContactSection: React.FC = () => {
                                   className="form-control"
                                   id="phone"
                                   name="phone"
+                                  value={phone}
+                                  onChange={(e) => setPhone(e.target.value)}
                                 />
                               </div>
                             </div>
@@ -149,6 +202,8 @@ const ContactSection: React.FC = () => {
                                 id="subject"
                                 name="subject"
                                 required
+                                value={subject}
+                                onChange={(e) => setSubject(e.target.value)}
                               />
                             </div>
 
@@ -162,6 +217,8 @@ const ContactSection: React.FC = () => {
                                 name="message"
                                 rows={3}
                                 required
+                                value={message}
+                                onChange={(e) => setMessage(e.target.value)}
                               ></textarea>
                             </div>
 
