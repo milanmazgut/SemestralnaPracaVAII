@@ -11,6 +11,8 @@ namespace SemestralnaPraca.Server.Data
         public DbSet<OrderItem> ItemsDb { get; set; }
         public DbSet<OrderState> OrderStates {  get; set; }
         public DbSet<Address> AddressDB { get; set; }
+        public DbSet<ContactMessage> ContactMessages { get; set; }
+
 
         public ApplicationDBContext (DbContextOptions<ApplicationDBContext> options) :base(options)
         {
