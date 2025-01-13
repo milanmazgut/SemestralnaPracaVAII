@@ -76,6 +76,27 @@ const AdminOrdersPage: React.FC = () => {
     }
   };
 
+  const handleDeleteOrder = async (orderId: number) => {
+    const confirmed = window.confirm(
+      "Naozaj chcete odstrániť túto objednávku?"
+    );
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`/api/Orders/delete/${orderId}`, {
+        withCredentials: true,
+      });
+
+      setOrders((prevOrders) =>
+        prevOrders.filter((order) => order.id !== orderId)
+      );
+
+      alert("Objednávka bola vymazaná.");
+    } catch (error) {
+      setErrorMessage("Nepodarilo sa vymazať objednávku.");
+    }
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -96,6 +117,7 @@ const AdminOrdersPage: React.FC = () => {
         isAdmin={true}
         onChangeOrderState={handleChangeOrderState}
         states={states}
+        onDeleteOrder={handleDeleteOrder}
       />
     </div>
   );

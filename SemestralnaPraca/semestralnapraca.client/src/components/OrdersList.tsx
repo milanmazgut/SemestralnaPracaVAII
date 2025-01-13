@@ -28,6 +28,7 @@ interface OrdersListProps {
   isAdmin?: boolean;
   onCancelOrder?: (orderId: number) => void;
   onChangeOrderState?: (orderId: number, newStateId: number) => void;
+  onDeleteOrder?: (orderId: number) => void;
   states: OrderState[];
 }
 
@@ -36,6 +37,7 @@ const OrdersList: React.FC<OrdersListProps> = ({
   isAdmin = false,
   onCancelOrder,
   onChangeOrderState,
+  onDeleteOrder,
   states,
 }) => {
   if (orders.length === 0) {
@@ -63,25 +65,40 @@ const OrdersList: React.FC<OrdersListProps> = ({
           </div>
           <div className="card-body">
             {isAdmin ? (
-              <div className="mb-3">
-                <label className="me-2">
-                  <strong>Stav:</strong>
-                </label>
-                <select
-                  value={order.stateId || ""}
-                  onChange={(e) => {
-                    const selectedValue = parseInt(e.target.value, 10);
-                    if (onChangeOrderState) {
-                      onChangeOrderState(order.id, selectedValue);
-                    }
-                  }}
-                >
-                  {states.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="mb-3 d-flex flex-column flex-md-row align-items-start gap-3">
+                <div>
+                  <label className="me-2">
+                    <strong>Stav:</strong>
+                  </label>
+                  <select
+                    value={order.stateId || ""}
+                    onChange={(e) => {
+                      const selectedValue = parseInt(e.target.value, 10);
+                      if (onChangeOrderState) {
+                        onChangeOrderState(order.id, selectedValue);
+                      }
+                    }}
+                  >
+                    {states.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => {
+                      if (onDeleteOrder) {
+                        onDeleteOrder(order.id);
+                      }
+                    }}
+                  >
+                    Vymazať objednávku
+                  </button>
+                </div>
               </div>
             ) : (
               <>

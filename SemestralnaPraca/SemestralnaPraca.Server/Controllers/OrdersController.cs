@@ -363,11 +363,45 @@ namespace SemestralnaPraca.Server.Controllers
             {
                 return BadRequest(new {message = "Objednavku už nemožno zrušiť"});
             }
-            order.StateId = 5; 
+            order.StateId = 5;
             await _dbContext.SaveChangesAsync();
 
             return Ok(new { message = "Objednávka bola úspešne zrušená." });
         }
+
+        [HttpDelete("delete/{orderId}")]
+        public async Task<IActionResult> DeleteOrder(int orderId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized(new { message = "Používateľ nie je prihlásený." });
+            }
+            var currentUser = await _userManager.FindByIdAsync(userId);
+            if (currentUser == null)
+            {
+                return Unauthorized(new { message = "Neplatný používateľ." });
+            }
+            
+            if (currentUser.Role != "Admin")
+            {
+                return Forbid();
+            }
+            var order = await _dbContext.OrdersDb
+                .Include(o => o.OrderItem) 
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                return NotFound(new { message = "Objednávka neexistuje." });
+            }
+            
+            _dbContext.OrdersDb.Remove(order);
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(new { message = "Objednávka bola úspešne vymazaná." });
+        }
+
     }
 
     public class CartItem
