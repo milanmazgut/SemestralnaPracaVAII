@@ -21,7 +21,7 @@ const UserRow: React.FC<UserRowProps> = ({ user, onEdit, onDelete }) => {
       <td>{user.role}</td>
       <td>
         <button
-          className="btn btn-primary btn-sm"
+          className="btn btn-primary btn-sm me-2"
           onClick={() => onEdit(user.id)}
         >
           Upraviť

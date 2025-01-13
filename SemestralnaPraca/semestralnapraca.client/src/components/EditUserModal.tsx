@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 interface User {
   id: string;
@@ -20,6 +21,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 }) => {
   const [editingUser, setEditingUser] = useState<User>(user);
   const [errors, setErrors] = useState<{ email?: string }>({});
+  const [serverError, setServerError] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -30,25 +33,53 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     });
     if (e.target.name === "email") {
       setErrors({ ...errors, email: "" });
+      setServerError("");
+      setSuccessMessage("");
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(editingUser.email)) {
-      setErrors({ email: "Prosim zadajte spravny email." });
+      setErrors({ email: "Prosím zadajte správny email." });
       return;
     }
 
-    onSave(editingUser);
+    try {
+      await axios.put("/api/Auth/EditUser", editingUser, {
+        withCredentials: true,
+      });
+      onSave(editingUser);
+    } catch (error: any) {
+      console.error("Chyba pri ukladaní používateľa:", error);
+
+      if (error.response && error.response.status === 409) {
+        setServerError(error.response.data.message || "Email už existuje.");
+      } else {
+        setServerError("Nastala chyba pri ukladaní.");
+      }
+    }
   };
 
   return (
     <div className="modal-overlay d-flex justify-content-center align-items-center">
       <div className="modal-dialog modal-content p-4">
-        <h4>Úprava požívateľa</h4>
+        <h4>Úprava používateľa</h4>
+
+        {serverError && (
+          <div className="alert alert-danger" role="alert">
+            {serverError}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="alert alert-success" role="alert">
+            {successMessage}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Meno:</label>
@@ -90,7 +121,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               <option value="User">User</option>
             </select>
           </div>
-          <div className="modal-footer">
+          <div className="modal-footer mt-3">
             <button
               type="button"
               className="btn btn-secondary"

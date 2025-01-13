@@ -14,11 +14,14 @@ const UsersTable: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>("");
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("/api/Auth/GetAllUsers");
+        const response = await axios.get("/api/Auth/GetAllUsers", {
+          withCredentials: true,
+        });
         setUsers(response.data);
       } catch (error) {
         console.error("Chyba pri ziskavani uzivatelov:", error);
@@ -36,33 +39,45 @@ const UsersTable: React.FC = () => {
     }
   };
 
-  const handleDelete = async (userId: string) => {
-    try {
-      await axios.delete(`/api/Auth/DeleteUser/${userId}`);
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-    } catch (error) {
-      console.error("Chyba pri mazani pouzivatela:", error);
-    }
+  const handleSave = (updatedUser: User) => {
+    setIsModalOpen(false);
+    setEditingUser(null);
+
+    setUsers((prevUsers) =>
+      prevUsers.map((user) => (user.id === updatedUser.id ? updatedUser : user))
+    );
+
+    setSuccessMessage("Používateľ bol úspešne upravený!");
+    setTimeout(() => setSuccessMessage(""), 3000);
   };
 
-  const handleSave = async (updatedUser: User) => {
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingUser(null);
+  };
+
+  const handleDelete = async (userId: string) => {
+    const confirmDelete = window.confirm("Naozaj chcete zmazať používateľa?");
+    if (!confirmDelete) return;
+
     try {
-      await axios.put("/api/Auth/EditUser", updatedUser);
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === updatedUser.id ? updatedUser : user
-        )
-      );
-      setIsModalOpen(false);
-      setEditingUser(null);
+      await axios.delete(`/api/Auth/DeleteUser/${userId}`, {
+        withCredentials: true,
+      });
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
     } catch (error) {
-      console.error("Chyba pri ukladani pouzivatela:", error);
+      console.error("Chyba pri mazaní používateľa:", error);
     }
   };
 
   return (
     <div className="container mt-5">
-      <h2>Spáva používatelov</h2>
+      <h2>Správa používateľov</h2>
+
+      {successMessage && (
+        <div className="alert alert-success my-3">{successMessage}</div>
+      )}
+
       <div className="table-responsive">
         <table className="table table-striped table-bordered mt-3">
           <thead className="thead-dark">
@@ -70,7 +85,7 @@ const UsersTable: React.FC = () => {
               <th>Meno</th>
               <th>Email</th>
               <th>Rola</th>
-              <th>Upravť</th>
+              <th>Akcie</th>
             </tr>
           </thead>
           <tbody>
@@ -90,7 +105,7 @@ const UsersTable: React.FC = () => {
         <EditUserModal
           user={editingUser}
           onSave={handleSave}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseModal}
         />
       )}
     </div>
