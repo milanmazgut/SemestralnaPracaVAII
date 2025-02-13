@@ -1,0 +1,132 @@
+body {
+  background-color: #f2e9e4;
+}
+
+.navbar {
+  background-color: #22223b;
+}
+
+.navbar .nav-link {
+  color: #f2e9e4;
+}
+
+.navbar .navbar-brand {
+  color: #f2e9e4;
+}
+
+.navbar .nav-link.active {
+  color: #ef476f;
+}
+
+.navbar .nav-link:hover {
+  color: #fbaf00;
+}
+
+.navbar-toggler {
+  background-color: #00c2d1;
+}
+.card-body {
+  background-color: #22223b;
+  color: #f2e9e4;
+}
+
+.navbar-toggler:hover {
+  background-color: #fbaf00;
+}
+
+.btn-primary {
+  margin: 2%;
+  white-space: nowrap;
+  color: #22223b;
+  border-color: #00c2d1;
+  background-color: #00c2d1;
+}
+
+.btn-primary:hover {
+  background-color: #fbaf00;
+  color: #22223b;
+  border-color: #fbaf00;
+}
+
+.btn-primary:disabled {
+  background-color: #f2e9e4;
+  color: #22223b;
+  border-color: #f2e9e4;
+}
+
+.btn-outline-primary {
+  margin: 2%;
+  color: #00c2d1;
+  border-color: #00c2d1;
+}
+
+.btn-secondary {
+  margin: 2%;
+  color: #f2e9e4;
+  border-color: #ef476f;
+  background-color: #ef476f;
+}
+
+.dropdown-menu {
+  background-color: #22223b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-item {
+  color: #f2e9e4;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin: 8px;
+  text-align: center;
+  width: 90%;
+}
+
+.card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+}
+
+.modal-dialog {
+  background-color: #fff;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-text {
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2; /* počet riadkov, ktoré sa zobrazia */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contact-left-col {
+  background: url("images/komin.jpg") center center / cover no-repeat,
+    rgba(0, 0, 0, 0.6);
+  background-blend-mode: overlay;
+}
+
+.dropzone {
+  border: 2px;
+  border-style: dashed;
+  border-color: #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 1rem;
+  cursor: pointer;
+}
